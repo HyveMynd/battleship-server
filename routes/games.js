@@ -405,7 +405,7 @@ var routes = function(app, express){
         checkValidPlayerForGame(req, res, next);
     }, function (req, res, next) {
         req.x = parseInt(req.body.xPos);
-        req.y = parseInt(req.body.yPox);
+        req.y = parseInt(req.body.yPos);
         var x = req.x;
         var y = req.y;
         if (x >= 0 && y >= 0 && x < 10 && y < 10){
