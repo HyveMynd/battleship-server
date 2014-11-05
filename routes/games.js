@@ -452,8 +452,15 @@ var routes = function(app, express){
                     ship.sunk = true;
                     req.sunk = true;
                 }
-                _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos}).status = "HIT";
-                _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos}).status = "HIT";
+                var play = _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+                var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+
+                if (play)
+                    play.status = "HIT";
+                if (opp)
+                    opp.status = "HIT";
+
+
                 req.hit = true;
                 next();
                 return;
@@ -462,8 +469,14 @@ var routes = function(app, express){
         console.log('should b')
 
         // No hit was registered. Mark as miss and continue
-        _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos}).status = "MISS";
-        _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos}).status = "MISS";
+        var play = _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+        var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+
+        if (play)
+            play.status = "MISS";
+        if (opp)
+            opp.status = "MISS";
+
         next();
     }, function (req, res) {
         if (_.all(req.opponent.ships, function (ship) {
