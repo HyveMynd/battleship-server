@@ -1,0 +1,18 @@
+.jumbotron
+    .container
+        h1 Battleship
+            h4 GameId: {{ gameId }}
+            h4 PlayerId: {{ playerId }}
+.row
+    .col-md-3.game-list
+        .container
+            .btn.btn-default(ng-click="newGame()") New Game
+            .panel-title(ng-repeat="game in games")
+                a.btn.btn-info(ng-click="gameClick(game)") {{ game.name }}
+    .col-md-9
+        table#gameGrid(cellspacing='0')
+            tr.gridRow(ng-repeat="i in getSize(10) track by $index")
+                td.box(ng-repeat="j in getSize(10) track by $index")
+
+
+

@@ -20,13 +20,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(methodOverride());
 
-require('./routes/home')(app);
-require('./routes/games')(app, express);
+app.use(require('stylus').middleware(path.join(__dirname, './public')));
+app.use(express.static(path.join(__dirname, './public')));
 
-var env = process.env.NODE_ENV || 'development';
-if ('development' == env) {
-    // configure stuff here
-}
+require('./routes/games')(app, express);
+require('./routes/home')(app, express);
 
 app.listen(3000);
-console.log('Magic happens on port 3000'); 			// shoutout to the user
+console.log('Magic happens on port 3000');
