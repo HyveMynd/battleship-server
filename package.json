@@ -18,6 +18,8 @@
     "jade": "^1.7.0",
     "method-override": "^2.3.0",
     "morgan": "^1.4.1",
-    "oriento": "^0.5.1"
+    "node-uuid": "^1.4.1",
+    "oriento": "^0.5.1",
+    "underscore": "^1.7.0"
   }
 }
