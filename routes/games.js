@@ -404,8 +404,10 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerForGame(req, res, next);
     }, function (req, res, next) {
-        var x = req.body.xPos;
-        var y = req.body.yPos;
+        req.x = parseInt(req.body.xPos);
+        req.y = parseInt(req.body.yPox);
+        var x = req.x;
+        var y = req.y;
         if (x >= 0 && y >= 0 && x < 10 && y < 10){
             next();
         } else {
@@ -434,7 +436,7 @@ var routes = function(app, express){
         }
     }, function (req, res, next) {
         var ships = req.opponent.ships;
-        var index = (req.body.yPos * 10) + req.body.xPos;
+        var index = (req.y * 10) + req.x;
         for (var i = 0; i < ships.length; i++){
             var ship = ships[i];
             if (_.contains(ship.hits, index)){
@@ -452,8 +454,8 @@ var routes = function(app, express){
                     ship.sunk = true;
                     req.sunk = true;
                 }
-                var play = _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
-                var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+                var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
+                var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.x, yPos: req.y});
 
                 if (play)
                     play.status = "HIT";
@@ -469,8 +471,8 @@ var routes = function(app, express){
         console.log('should b')
 
         // No hit was registered. Mark as miss and continue
-        var play = _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
-        var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.body.xPos, yPos: req.body.yPos});
+        var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
+        var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.x, yPos: req.y});
 
         if (play)
             play.status = "MISS";
