@@ -353,12 +353,12 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerForGame(req, res, next);
     }, function (req, res) {
-        if (req.game.player1.id === req.body.playerId && req.game.isPlayer1Turn){
+        if (req.player1.id === req.body.playerId && req.game.isPlayer1Turn){
             res.json({
                 isYourTurn: true,
                 winner : req.game.winner
             });
-        } else if (req.game.player2.id === req.body.playerId && !req.game.isPlayer1Turn){
+        } else if (req.player2.id === req.body.playerId && !req.game.isPlayer1Turn){
             res.json({
                 isYourTurn: true,
                 winner : req.game.winner
@@ -381,15 +381,15 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerForGame(req, res, next);
     }, function (req, res) {
-        if (req.game.player1.id === req.body.playerId){
+        if (req.player1.id === req.body.playerId){
             res.json({
-                playerBoard: req.game.player1.playerBoard,
-                opponentBoard: req.game.player1.opponentBoard
+                playerBoard: req.player1.playerBoard,
+                opponentBoard: req.player1.opponentBoard
             });
         } else {
             res.json({
-                playerBoard: req.game.player2.playerBoard,
-                opponentBoard: req.game.player2.opponentBoard
+                playerBoard: req.player2.playerBoard,
+                opponentBoard: req.player2.opponentBoard
             });
         }
     });
@@ -459,7 +459,7 @@ var routes = function(app, express){
                 return;
             }
         }
-        console.log('should be here')
+        console.log('should b')
 
         // No hit was registered. Mark as miss and continue
         _.findWhere(req.player.opponentBoard, {xPos: req.body.xPos, yPos: req.body.yPos}).status = "MISS";
