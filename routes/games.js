@@ -1,7 +1,6 @@
 /**
  * Created by Andres Monroy (HyveMynd) on 11/4/14.
  */
-"use strict";
 var Oriento = require('oriento');
 var server = Oriento({
     host: 'localhost',
@@ -214,8 +213,17 @@ var updateGameAndPlayers = function (req, res) {
     });
 };
 
-var checkInvalidNames = function (req, res, next) {
-
+var isValidName = function (string) {
+    var str = string.toLowerCase();
+    return str !== "in progress"
+        && str !== 'done'
+        && str != 'waiting'
+        && str != 'playing'
+        && str != 'winner'
+        && str != 'ship'
+        && str != 'hit'
+        && str != 'miss'
+        && str != 'none'
 };
 
 var routes = function(app, express){
@@ -292,6 +300,12 @@ var routes = function(app, express){
         } else {
             next();
         }
+    }, function (req, res, next) {
+        if (!isValidName(req.body.gameName) || !isValidName(req.body.playerName)){
+            res.status(400).json({message: 'Name is not valid'});
+        } else {
+            next()
+        }
     }, function (req, res) {
         var player1 = createPlayer(req.body.playerName);
         db.insert().into('player').set(player1).one().then(function (player) {
@@ -319,6 +333,12 @@ var routes = function(app, express){
             next();
         } else {
             res.status(400).json({message: 'Player name must be alphanumeric'});
+        }
+    }, function (req, res, next) {
+        if (isValidName(req.body.playerName)) {
+            next()
+        } else {
+            res.status(400).json({message: 'Name is not valid'});
         }
     }, function (req, res, next) {
         checkValidGame(req, res, next);
