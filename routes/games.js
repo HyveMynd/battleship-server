@@ -1,6 +1,7 @@
 /**
  * Created by Andres Monroy (HyveMynd) on 11/4/14.
  */
+"use strict";
 var Oriento = require('oriento');
 var server = Oriento({
     host: 'localhost',
@@ -155,7 +156,7 @@ var createPlayer = function (name) {
 };
 
 var isAlpha = function (string) {
-    return string && string.match(/^[a-z0-9]+$/i);
+    return string && string.match(/^[a-z0-9 ]+$/i);
 };
 
 var isGUID = function (string) {
@@ -211,6 +212,10 @@ var updateGameAndPlayers = function (req, res) {
             });
         });
     });
+};
+
+var checkInvalidNames = function (req, res, next) {
+
 };
 
 var routes = function(app, express){
