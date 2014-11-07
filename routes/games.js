@@ -477,8 +477,8 @@ var routes = function(app, express){
             } else if (_.contains(ship.positions, index)){
                 ship.hits.push(index);
                 if (ship.hits.length === ship.positions.length){
-                    ship.sunk = true;
-                    req.sunk = true;
+                    ship.sunk = ship.positions.length;
+                    req.sunk = ship.positions.length;
                 }
                 var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
                 var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.x, yPos: req.y});
