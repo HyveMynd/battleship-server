@@ -119,9 +119,10 @@ var createPlayerBoard = function () {
         board: board,
         ships: []
     };
+
     for (var i = 0; i < ships.length; i++){
         var ship = ships[i];
-        if (ship) {
+        if (ship.length > 0) {
             data.ships.push({
                 length: ship.length,
                 positions: ship,
