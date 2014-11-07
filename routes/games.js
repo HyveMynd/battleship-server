@@ -1,8 +1,7 @@
 /**
  * Created by Andres Monroy (HyveMynd) on 11/4/14.
  */
-var Oriento = require('oriento');
-var server = Oriento({
+var server = require('oriento')({
     host: 'localhost',
     port: 2424,
     username: 'root',
@@ -12,6 +11,7 @@ var db = server.use('battleship-db');
 var uuid = require('node-uuid');
 var async = require('async');
 var _ = require('underscore');
+var util = require('util');
 
 var createEmptyBoard = function () {
     var board = [];
@@ -33,11 +33,10 @@ var createPlayerBoard = function () {
     var board = [];
     var ships = [];
     var boardSize = 10;
-    var smallestShip = 2;
-    var largestShip = 5;
+    var shipTypes = [5,4,3,3,2];
     for (var i = 0; i < boardSize * boardSize; i++) board[i] = 0;
 
-    for (var i = smallestShip; i <= largestShip;)
+    for (var i = 0; i <= shipTypes.length;)
     {
         // Choose random starting position and random direction
         var newPos = Math.floor(Math.random() * boardSize * boardSize);
@@ -52,11 +51,11 @@ var createPlayerBoard = function () {
 
         if (horizontal == true)
         {
-            newX = x + i;
+            newX = x + shipTypes[i];
         }
         else
         {
-            newY = y + i;
+            newY = y + shipTypes[i];
         }
 
         // If ship is out of bounds of the board, try again
@@ -67,7 +66,7 @@ var createPlayerBoard = function () {
 
         // Check if the position of the new ship contains no ships
         var positionValid = true;
-        for (var j = 0; j < i; j++)
+        for (var j = 0; j < shipTypes[i]; j++)
         {
             var testX = x + (newDir == 0 ? j : 0);
             var testY = y + (newDir != 0 ? j : 0);
@@ -85,7 +84,7 @@ var createPlayerBoard = function () {
 
         // Position Valid, place the ship
         ships[i] = [];
-        for (var j = 0; j < i; j++)
+        for (var j = 0; j < shipTypes[i]; j++)
         {
             var testX = x + (newDir == 0 ? j : 0);
             var testY = y + (newDir != 0 ? j : 0);
@@ -99,7 +98,8 @@ var createPlayerBoard = function () {
 
 
     var shipTiles = 0;
-    var expectedShipTiles = (smallestShip + largestShip)*(largestShip - smallestShip + 1)/2;
+    var expectedShipTiles = 0;
+    for (var i = 0; i < shipTypes.length; i++) expectedShipTiles += shipTypes[i];
     for (var i = 0; i < boardSize * boardSize; i++)
     {
         if (board[i] != 0)
@@ -110,6 +110,7 @@ var createPlayerBoard = function () {
 
     if (shipTiles != expectedShipTiles)
     {
+        console.log(util.format('Actual: %d, Expected: %d', shipTiles, expectedShipTiles));
         throw new Error("Unexpected number of ships");
     }
 
@@ -493,7 +494,6 @@ var routes = function(app, express){
                 return;
             }
         }
-        console.log('should b')
 
         // No hit was registered. Mark as miss and continue
         var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
