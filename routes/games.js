@@ -126,7 +126,7 @@ var createPlayerBoard = function () {
                 length: ship.length,
                 positions: ship,
                 hits: [],
-                sunk: false
+                sunk: 0
             });
         }
     }
@@ -207,7 +207,7 @@ var updateGameAndPlayers = function (req, res) {
                 console.log('Guess: Updated opponent: ' + results);
                 res.json({
                     hit: req.hit || false,
-                    shipSunk: req.sunk || false
+                    shipSunk: req.sunk || 0
                 });
             });
         });
@@ -507,7 +507,7 @@ var routes = function(app, express){
         next();
     }, function (req, res) {
         if (_.all(req.opponent.ships, function (ship) {
-                return ship.sunk === true;
+                return ship.sunk !== 0;
             })){
             req.game.status = "DONE";
             req.game.winner = req.player.name;
