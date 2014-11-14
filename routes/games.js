@@ -278,7 +278,8 @@ var routes = function(app, express){
             name: game.name,
             player1: '',
             player2: '',
-            winner: game.winner
+            winner: game.winner,
+            missilesLaunched: game.turns
         };
         db.record.get(game.player1).then(function (player1) {
             data.player1 = player1.name;
@@ -316,7 +317,8 @@ var routes = function(app, express){
                 id: uuid.v4(),
                 player1: player['@rid'],
                 status: 'WAITING',
-                winner: 'IN PROGRESS'
+                winner: 'IN PROGRESS',
+                turns: 0
             };
             db.insert().into('game').set(game).one().then(function (game) {
                 res.json({
@@ -435,6 +437,12 @@ var routes = function(app, express){
     router.post('/games/:id/guess', function (req, res, next) {
        checkValidGame(req, res, next);
     }, function (req, res, next) {
+        if (req.game.status === 'PLAYING'){
+            next();
+        } else {
+            res.status(400).json({message: 'Game is not in play.'});
+        }
+    }, function (req, res, next) {
         checkValidPlayerId(req, res, next);
     }, function (req, res, next) {
         checkValidPlayerForGame(req, res, next);
@@ -468,6 +476,12 @@ var routes = function(app, express){
                 console.log('not turn 2');
                 res.status(400).json({message: 'Not your turn'});
             }
+        }
+    }, function (req, res, next) {
+        if (req.game.status === 'PLAYING'){
+            next();
+        } else {
+            res.status(400).json({message: 'Game is not in play.'});
         }
     }, function (req, res, next) {
         var ships = req.opponent.ships;
@@ -522,7 +536,7 @@ var routes = function(app, express){
             req.game.winner = req.player.name;
         }
         req.game.isPlayer1Turn = !req.game.isPlayer1Turn;
-
+        req.game.turns++;
         updateGameAndPlayers(req, res);
     });
 
