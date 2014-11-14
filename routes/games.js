@@ -406,6 +406,12 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerId(req, res, next);
     }, function (req, res, next) {
+        if (req.game.status !== 'PLAYING'){
+            res.status(400).json({message: 'Game is not in play.'})
+        } else {
+            next();
+        }
+    }, function (req, res, next) {
         checkValidPlayerForGame(req, res, next);
     }, function (req, res) {
         if (req.player1.id === req.body.playerId){
@@ -413,11 +419,13 @@ var routes = function(app, express){
                 playerBoard: req.player1.playerBoard,
                 opponentBoard: req.player1.opponentBoard
             });
-        } else {
+        } else if (req.player2.id === req.body.playerId) {
             res.json({
                 playerBoard: req.player2.playerBoard,
                 opponentBoard: req.player2.opponentBoard
             });
+        } else {
+            res.status(400).json({message: 'Player does not belong to game.'})
         }
     });
 
