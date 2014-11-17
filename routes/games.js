@@ -408,7 +408,7 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerId(req, res, next);
     }, function (req, res, next) {
-        if (req.game.status !== 'PLAYING'){
+        if (req.game.status !== 'PLAYING' || req.game.status !== 'DONE'){
             res.status(400).json({message: 'Game is not in play.'})
         } else {
             next();
