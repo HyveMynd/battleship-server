@@ -478,12 +478,6 @@ var routes = function(app, express){
             }
         }
     }, function (req, res, next) {
-        if (req.game.status === 'PLAYING'){
-            next();
-        } else {
-            res.status(400).json({message: 'Game is not in play.'});
-        }
-    }, function (req, res, next) {
         var ships = req.opponent.ships;
         var index = (req.y * 10) + req.x;
         for (var i = 0; i < ships.length; i++){
