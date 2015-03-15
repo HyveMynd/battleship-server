@@ -1,0 +1,7 @@
+{
+  "host": "localhost",
+  "port": "2424",
+  "username": "root",
+  "password": "password",
+  "db": "battleship-db"
+}
