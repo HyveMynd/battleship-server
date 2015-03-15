@@ -371,7 +371,7 @@ var routes = function(app, express){
     }, function (req, res, next) {
         checkValidPlayerId(req, res, next);
     }, function (req, res, next) {
-        if (req.game.status == "WAITING"){
+        if (req.game.status === "WAITING"){
             res.json({
                 isYourTurn: false,
                 winner : req.game.winner
