@@ -179,7 +179,8 @@ var LobbyRoutes = function (express) {
     };
 
     var getGameWithId = function (req, res, next) {
-        gameRepo.first({id: req.params.id})
+        var id = req.params.id || req.body.id;
+        gameRepo.first({id: id})
             .then(function (game) {
                 if (game){
                     req.game = game;
@@ -210,10 +211,6 @@ var LobbyRoutes = function (express) {
             }
             next();
         }
-    };
-
-    var gameIsValid = function (req, res, next) {
-        gameRepo.find()
     };
 
     /**
@@ -301,13 +298,29 @@ var LobbyRoutes = function (express) {
         });
 
 
-    //router.put('/',
-    //    namesAreAlphaNumeric(['playerName']),
-    //    namesAreValid(['playerName']),
-    //    gameIsValid(),
-    //    function (req, res) {
-    //
-    //    });
+    router.put('/',
+        namesAreAlphaNumeric(['playerName']),
+        namesAreValid(['playerName']),
+        getGameWithId,
+        function (req, res, next) {
+            if (req.game.status != 'WAITING') {
+                res.status(400).json({message: 'The game cannot be joined'});
+            } else {
+                req.game.status = 'PLAYING';
+                createPlayer(req.body.playerName)
+                    .bind({req: req, res: res, next: next})
+                    .then(function (player2) {
+                        req.game.player2 = player2['@rid'];
+                        req.game.isPlayer1Turn = true;
+                        gameRepo.update(req.game, {id: req.game.id})
+                            .bind(this)
+                            .then(function (results) {
+                                console.log('Join Game: Updated ' + results + ' game');
+                                res.json({playerId: player2.id});
+                            }).done()
+                    }).catch(sendError).done();
+            }
+        });
 
     return router;
 };
