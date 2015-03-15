@@ -23,10 +23,10 @@ app.use(methodOverride());
 app.use(require('stylus').middleware(path.join(__dirname, './public')));
 app.use(express.static(path.join(__dirname, './public')));
 
-//require('./routes/games')(app, express);
-require('./routes/home')(app, express);
+require('./routes/games')(app, express);
 app.use('/api/v2', require('./routes/gamesv2')(express));
-app.use('/api/v2', require('./routes/lobby')(express));
+app.use('/api/v2/lobby', require('./routes/lobby')(express));
+require('./routes/home')(app, express);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

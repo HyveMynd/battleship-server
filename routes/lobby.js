@@ -7,6 +7,7 @@ var Promise = require('bluebird');
 var uuid = require('node-uuid');
 var GameRepo = require('../repos/GameRepo');
 var PlayerRepo = require('../repos/PlayerRepo');
+var _ = require('underscore');
 
 var LobbyRoutes = function (express) {
     var router = express.Router();
@@ -163,7 +164,7 @@ var LobbyRoutes = function (express) {
     };
 
     var sendError = function (err) {
-        this.res.status(500).json(err);
+        this.next(err);
     };
 
     var initPlayer = function (name) {
@@ -178,14 +179,13 @@ var LobbyRoutes = function (express) {
     };
 
     var getGameWithId = function (req, res, next) {
-        return gameRepo.first({id: req.params.id})
-            .bind({req: req, res: res, next: next})
+        gameRepo.first({id: req.params.id})
             .then(function (game) {
                 if (game){
-                    this.req.game = game;
-                    this.next()
+                    req.game = game;
+                    next()
                 } else {
-                    this.res.status(400).json({message: 'Game with the given id does not exist'})
+                    res.status(400).json({message: 'Game with the given id does not exist'})
                 }
         }).catch(sendError).done();
     };
@@ -219,8 +219,9 @@ var LobbyRoutes = function (express) {
     /**
      * Get a list of games
      */
-    router.get('/lobby', function (req, res) {
+    router.get('/', function (req, res, next) {
         gameRepo.all()
+            .bind({req: req, res: res, next: next})
             .then(function (games) {
                 var gamesArr = [];
                 _.each(games, function (game) {
@@ -237,7 +238,7 @@ var LobbyRoutes = function (express) {
     /**
      * Get a specific game
      */
-    router.get('/lobby/:id', getGameWithId, function (req, res) {
+    router.get('/:id', getGameWithId, function (req, res, next) {
         var game = req.game;
         var data = {
             id: game.id,
@@ -249,6 +250,7 @@ var LobbyRoutes = function (express) {
         };
 
         gameRepo.find(game.player1)
+            .bind({req: req, res: res, next: next})
             .then(function (player1) {
                 data.player1 = player1.name;
                 if (!game.player2){
@@ -271,12 +273,14 @@ var LobbyRoutes = function (express) {
             winner: 'IN PROGRESS',
             turns: 0
         };
-        return gameRepo.create(game).bind(this).then(function (game) {
-            this.res.json({
-                playerId: player.id,
-                gameId: game.id
-            });
-        })
+        return gameRepo.create(game)
+            .bind(this)
+            .then(function (game) {
+                this.res.json({
+                    playerId: player.id,
+                    gameId: game.id
+                }).catch(sendError).done();
+            })
     };
 
     var createPlayer = function (playerName) {
@@ -287,17 +291,17 @@ var LobbyRoutes = function (express) {
     /**
      * Create a New Game
      */
-    router.post('/lobby',
+    router.post('/',
         namesAreAlphaNumeric(['gameName', 'playerName']),
         namesAreValid(['gameName', 'playerName']),
-        function (req, res) {
+        function (req, res, next) {
             createPlayer(req.body.playerName)
-                .bind({req: req, res: res})
+                .bind({req: req, res: res, next: next})
                 .then(createGame).catch(sendError).done();
         });
 
 
-    //router.put('/lobby',
+    //router.put('/',
     //    namesAreAlphaNumeric(['playerName']),
     //    namesAreValid(['playerName']),
     //    gameIsValid(),
