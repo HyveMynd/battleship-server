@@ -24,7 +24,7 @@ app.use(require('stylus').middleware(path.join(__dirname, './public')));
 app.use(express.static(path.join(__dirname, './public')));
 
 require('./routes/games')(app, express);
-app.use('/api/v2', require('./routes/gamesv2')(express));
+app.use('/api/v2/games', require('./routes/gamesv2')(express));
 app.use('/api/v2/lobby', require('./routes/lobby')(express));
 require('./routes/home')(app, express);
 
