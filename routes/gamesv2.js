@@ -49,8 +49,39 @@ var GameRoutes = function(express){
             }
         });
 
+    /**
+     * Get Player boards
+     */
+    router.get('/:id/boards',
+        utils.getGameWithId,
+        utils.isValidPlayerId,
+        function (req, res, next) {
+            // Short circuit if the game is not in play
+            if (req.game.status !== 'PLAYING' && req.game.status !== 'DONE'){
+                res.status(400).json({message: 'Game is not in play.'})
+            } else {
+                next();
+            }
+        },
+        utils.playerBelongsToGame,
+        function (req, res) {
+            if (req.player1.id === req.query.playerId){
+                res.json({
+                    playerBoard: req.player1.playerBoard,
+                    opponentBoard: req.player1.opponentBoard
+                });
+            } else if (req.player2.id === req.query.playerId) {
+                res.json({
+                    playerBoard: req.player2.playerBoard,
+                    opponentBoard: req.player2.opponentBoard
+                });
+            } else {
+                res.status(400).json({message: 'Player does not belong to game.'})
+            }
+        }
+    );
+
     router.post('/');
-    router.get('/:id/boards');
 
     return router;
 };
