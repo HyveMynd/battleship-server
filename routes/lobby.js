@@ -12,52 +12,54 @@ var LobbyRoutes = function (express) {
     var gameRepo = new GameRepo();
     var utils = new Utils();
 
+    var pageResults = function (games) {
+        var gamesArr = [];
+        var results = this.req.query.results;
+        var offset = this.req.query.offset;
+
+        // Transform the results
+        _.each(games, function (game) {
+            gamesArr.push({
+                id:game.id,
+                name:game.name,
+                status: game.status
+            })
+        });
+
+        // Filter by offset
+        var pages = [];
+        if ((offset >= 0) && (results > 0)){
+            while(gamesArr.length > 0){
+                pages.push(gamesArr.splice(0,results))
+            }
+        }
+
+        if (pages.length > 0){
+            if (pages.length < offset){
+                this.res.json([])
+            } else {
+                this.res.json(pages[offset]);
+            }
+        } else {
+            this.res.json(gamesArr)
+        }
+    };
+
     /**
      * Get a list of games
      */
     router.get('/', function (req, res, next) {
-        gameRepo.all()
-            .bind({req: req, res: res, next: next})
-            .then(function (games) {
-                var gamesArr = [];
-                var status = req.query.status;
-                var results = req.query.results;
-                var offset = req.query.offset;
+        var status = req.query.status;
+        var promise = null;
+        if (status){
+            promise = gameRepo.where({status: status.toUpperCase()})
+        } else {
+            promise = gameRepo.all()
+        }
 
-                // Transform the results
-                _.each(games, function (game) {
-                    gamesArr.push({
-                        id:game.id,
-                        name:game.name,
-                        status: game.status
-                    })
-                });
-
-                // Filter by status
-                if (status){
-                    gamesArr = _.filter(gamesArr, function (game) {
-                        return game.status === status.toUpperCase();
-                    })
-                }
-
-                // Filter by offset
-                var pages = [];
-                if ((offset >= 0) && (results > 0)){
-                    while(gamesArr.length > 0){
-                        pages.push(gamesArr.splice(0,results))
-                    }
-                }
-
-                if (pages.length > 0){
-                    if (pages.length < offset){
-                        res.json([])
-                    } else {
-                        res.json(pages[offset]);
-                    }
-                } else {
-                    res.json(gamesArr)
-                }
-            }).catch(utils.sendError).done()
+        promise.bind({req: req, res: res, next: next})
+            .then(pageResults)
+            .catch(utils.sendError).done();
     });
 
     /**
