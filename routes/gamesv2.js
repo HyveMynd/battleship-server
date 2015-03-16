@@ -5,6 +5,7 @@
 var Utils = require('../lib/utils');
 var GameRepo = require('../lib/GameRepo');
 var PlayerRepo = require('../lib/PlayerRepo');
+var _ = require('underscore');
 
 var GameRoutes = function(express){
     var router = express.Router();
@@ -55,14 +56,7 @@ var GameRoutes = function(express){
     router.get('/:id/boards',
         utils.getGameWithId,
         utils.isValidPlayerId,
-        function (req, res, next) {
-            // Short circuit if the game is not in play
-            if (req.game.status !== 'PLAYING' && req.game.status !== 'DONE'){
-                res.status(400).json({message: 'Game is not in play.'})
-            } else {
-                next();
-            }
-        },
+        utils.gameIsInPlay,
         utils.playerBelongsToGame,
         function (req, res) {
             if (req.player1.id === req.query.playerId){
@@ -81,7 +75,75 @@ var GameRoutes = function(express){
         }
     );
 
-    router.post('/');
+    router.post('/',
+        utils.getGameWithId,
+        utils.gameIsInPlay,
+        utils.isValidPlayerId,
+        utils.playerBelongsToGame,
+        utils.areValidPositions,
+        utils.isPlayersTurn,
+        function (req, res, next) {
+            var ships = req.opponent.ships;
+            var index = (req.y * 10) + req.x;
+            for (var i = 0; i < ships.length; i++){
+                var ship = ships[i];
+                if (_.contains(ship.hits, index)){
+                    req.game.name = 'I am a Teapot';
+                    req.game.winner = "Teapot";
+                    req.game.status = 'DONE';
+                    req.player.name = 'Short';
+                    req.opponent.name = 'Stout';
+                    return utils.updateGameAndPlayers(req.game, req.player, req.opponent).then(function () {
+                        res.status(418).json({message: 'I am a teapot'});
+                    });
+                } else if (_.contains(ship.positions, index)){
+                    ship.hits.push(index);
+                    if (ship.hits.length === ship.positions.length){
+                        ship.sunk = ship.positions.length;
+                        req.sunk = ship.positions.length;
+                    }
+                    var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
+                    var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.x, yPos: req.y});
+
+                    if (play)
+                        play.status = "HIT";
+                    if (opp)
+                        opp.status = "HIT";
+
+
+                    req.hit = true;
+                    return next();
+                }
+            }
+
+            // No hit was registered. Mark as miss and continue
+            var play = _.findWhere(req.player.opponentBoard, {xPos: req.x, yPos: req.y});
+            var opp = _.findWhere(req.opponent.playerBoard, {xPos: req.x, yPos: req.y});
+
+            if (play)
+                play.status = "MISS";
+            if (opp)
+                opp.status = "MISS";
+
+            next();
+        },
+        function (req, res) {
+            if (_.all(req.opponent.ships, function (ship) {
+                    return ship.sunk !== 0;
+                })){
+                req.game.status = "DONE";
+                req.game.winner = req.player.name;
+            }
+            req.game.isPlayer1Turn = !req.game.isPlayer1Turn;
+            req.game.turns++;
+            utils.updateGameAndPlayers(req.game, req.player, req.opponent).then(function () {
+                res.json({
+                    hit: req.hit || false,
+                    shipSunk: req.sunk || 0
+                });
+            });
+        }
+    );
 
     return router;
 };
