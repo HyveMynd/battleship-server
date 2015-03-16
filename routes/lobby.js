@@ -20,6 +20,11 @@ var LobbyRoutes = function (express) {
             .bind({req: req, res: res, next: next})
             .then(function (games) {
                 var gamesArr = [];
+                var status = req.query.status;
+                var results = req.query.results;
+                var offset = req.query.offset;
+
+                // Transform the results
                 _.each(games, function (game) {
                     gamesArr.push({
                         id:game.id,
@@ -27,7 +32,31 @@ var LobbyRoutes = function (express) {
                         status: game.status
                     })
                 });
-                res.json(gamesArr)
+
+                // Filter by status
+                if (status){
+                    gamesArr = _.filter(gamesArr, function (game) {
+                        return game.status === status.toUpperCase();
+                    })
+                }
+
+                // Filter by offset
+                var pages = [];
+                if ((offset >= 0) && (results > 0)){
+                    while(gamesArr.length > 0){
+                        pages.push(gamesArr.splice(0,results))
+                    }
+                }
+
+                if (pages.length > 0){
+                    if (pages.length < offset){
+                        res.json([])
+                    } else {
+                        res.json(pages[offset]);
+                    }
+                } else {
+                    res.json(gamesArr)
+                }
             }).catch(utils.sendError).done()
     });
 
