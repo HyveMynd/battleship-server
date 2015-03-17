@@ -106,7 +106,7 @@ var LobbyRoutes = function (express) {
     /**
      * Join a Game
      */
-    router.put('/',
+    router.put('/:id',
         utils.namesAreAlphaNumeric(['playerName']),
         utils.namesAreValid(['playerName']),
         utils.getGameWithId,

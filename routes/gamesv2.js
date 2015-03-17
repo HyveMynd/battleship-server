@@ -75,7 +75,7 @@ var GameRoutes = function(express){
         }
     );
 
-    router.post('/',
+    router.post('/:id',
         utils.getGameWithId,
         utils.gameIsInPlay,
         utils.isValidPlayerId,
@@ -93,9 +93,11 @@ var GameRoutes = function(express){
                     req.game.status = 'DONE';
                     req.player.name = 'Short';
                     req.opponent.name = 'Stout';
-                    return utils.updateGameAndPlayers(req.game, req.player, req.opponent).then(function () {
-                        res.status(418).json({message: 'I am a teapot'});
-                    });
+                    return utils.updateGameAndPlayers(req.game, req.player, req.opponent)
+                        .bind({req: req, res: res, next: next})
+                        .then(function () {
+                            res.status(418).json({message: 'I am a teapot'});
+                        }).catch(utils.sendError);
                 } else if (_.contains(ship.positions, index)){
                     ship.hits.push(index);
                     if (ship.hits.length === ship.positions.length){
@@ -127,7 +129,7 @@ var GameRoutes = function(express){
 
             next();
         },
-        function (req, res) {
+        function (req, res, next) {
             if (_.all(req.opponent.ships, function (ship) {
                     return ship.sunk !== 0;
                 })){
@@ -136,12 +138,14 @@ var GameRoutes = function(express){
             }
             req.game.isPlayer1Turn = !req.game.isPlayer1Turn;
             req.game.turns++;
-            utils.updateGameAndPlayers(req.game, req.player, req.opponent).then(function () {
-                res.json({
-                    hit: req.hit || false,
-                    shipSunk: req.sunk || 0
+            utils.updateGameAndPlayers(req.game, req.player, req.opponent)
+                .bind({req: req, res: res, next: next})
+                .then(function () {
+                    res.json({
+                        hit: req.hit || false,
+                        shipSunk: req.sunk || 0
+                    });
                 });
-            });
         }
     );
 
