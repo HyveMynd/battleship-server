@@ -73,7 +73,8 @@ var LobbyRoutes = function (express) {
             player1: '',
             player2: '',
             winner: game.winner,
-            missilesLaunched: game.turns
+            missilesLaunched: game.turns,
+            status: game.status
         };
 
         gameRepo.find(game.player1)
