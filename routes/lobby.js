@@ -12,54 +12,43 @@ var LobbyRoutes = function (express) {
     var gameRepo = new GameRepo();
     var utils = new Utils();
 
-    var pageResults = function (games) {
-        var gamesArr = [];
-        var results = this.req.query.results;
-        var offset = this.req.query.offset;
-
-        // Transform the results
-        _.each(games, function (game) {
-            gamesArr.push({
-                id:game.id,
-                name:game.name,
-                status: game.status
-            })
-        });
-
-        // Filter by offset
-        var pages = [];
-        if ((offset >= 0) && (results > 0)){
-            while(gamesArr.length > 0){
-                pages.push(gamesArr.splice(0,results))
-            }
-        }
-
-        if (pages.length > 0){
-            if (pages.length < offset){
-                this.res.json([])
-            } else {
-                this.res.json(pages[offset]);
-            }
-        } else {
-            this.res.json(gamesArr)
-        }
-    };
-
     /**
      * Get a list of games
      */
     router.get('/', function (req, res, next) {
         var status = req.query.status;
+        var offset = req.query.offset;
+        var results = req.query.results;
         var promise = null;
+        var params = {};
+
+        var query = "select * from Game ";
+
         if (status){
-            promise = gameRepo.where({status: status.toUpperCase()})
-        } else {
-            promise = gameRepo.all()
+            var where = 'where status=:status ';
+            params.status = status.toUpperCase();
+            query += where;
         }
 
-        promise.bind({req: req, res: res, next: next})
-            .then(pageResults)
-            .catch(utils.sendError).done();
+        if (offset && results){
+            var skip = results * offset;
+            query += ' skip ' + skip + ' limit ' + results;
+        }
+
+        gameRepo.raw().query(query, {params:params})
+            .bind({req: req, res: res, next: next})
+            .then(function (games) {
+                var gamesArr = [];
+                // Transform the results
+                _.each(games, function (game) {
+                    gamesArr.push({
+                        id:game.id,
+                        name:game.name,
+                        status: game.status
+                    })
+                });
+                this.res.json(gamesArr)
+            }).catch(utils.sendError).done();
     });
 
     /**
