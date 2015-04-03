@@ -19,7 +19,6 @@ var LobbyRoutes = function (express) {
         var status = req.query.status;
         var offset = req.query.offset;
         var results = req.query.results;
-        var promise = null;
         var params = {};
 
         var query = "select * from Game ";
@@ -118,6 +117,17 @@ var LobbyRoutes = function (express) {
                             }).done()
                     }).catch(utils.sendError).done();
             }
+        });
+
+    /**
+     * Delete game
+     */
+    router.delete('/:id',
+        utils.getGameWithId,
+        function (req, res) {
+            gameRepo.remove({id: req.game.id}).then(function (result) {
+                res.json({success: result})
+            }).catch(utils.sendError).done();
         });
 
     return router;
