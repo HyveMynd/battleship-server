@@ -222,3 +222,18 @@ Will return the status of the player's entire board for the game with the given 
 - MISS: a player has missed this cell
 - SHIP: this cell is part of a ship and has not been hit
 - NONE: this cell has no activity
+
+## <u>Game AI</u>
+The server also comes with its own battleship AI and functions as follows:
+
+The bot server polls every 30 seconds for games. If a game is named with the correct name, it will join automatically with the specified AI.
+
+Valid Game Names:
+
+- RANDOMBOT - Completely random.
+- SPIRALBOT - Begins at the center and spiral out.
+- SMARTBOT - Attempts to intelligently destroy your ships.
+
+If you create a game with the name RANDOMBOT, the bot server will create a bot with the random AI and play against you.
+
+The bot will continue to play against you until a winner has been declared. While the game is in progress, the bot will poll for your game with exponential backoff up to 1 minute. The bot will abandon games if there is no activity for 6 hours.
