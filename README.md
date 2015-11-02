@@ -20,7 +20,7 @@ Response will use standard HTTP status codes.
 
 In the case of a `4xx` or `5xx` error, check the `message` property in the top level of the JSON response.
 
-## <u> Game Lobby </u>
+## Game Lobby
 
 ### Get list of games
 Gets a list of games from the lobby. Query parameters may be used to filter the result set. For example, querying for completed or in progress games
@@ -223,7 +223,7 @@ Will return the status of the player's entire board for the game with the given 
 - SHIP: this cell is part of a ship and has not been hit
 - NONE: this cell has no activity
 
-## <u>Game AI</u>
+## Game AI
 The server also comes with its own battleship AI and functions as follows:
 
 The bot server polls every 30 seconds for games. If a game is named with the correct name, it will join automatically with the specified AI.
